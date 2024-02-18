@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	"example.com/passwork-client-go"
+	"github.com/lupa95/passwork-client-go"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"

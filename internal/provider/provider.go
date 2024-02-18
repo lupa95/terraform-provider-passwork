@@ -7,13 +7,13 @@ import (
 	"context"
 	"os"
 
-	"example.com/passwork-client-go"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/lupa95/passwork-client-go"
 )
 
 // Ensure PassworkProvider satisfies various provider interfaces.
