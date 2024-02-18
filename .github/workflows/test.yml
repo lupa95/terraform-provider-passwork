@@ -34,6 +34,7 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: true
+      - run: git config --global url.https://$GH_ACCESS_TOKEN@github.com/.insteadOf https://github.com/
       - run: go mod download
       - run: go build -v .
       - name: Run linters
