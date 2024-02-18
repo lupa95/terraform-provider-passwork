@@ -73,5 +73,3 @@ require (
 	google.golang.org/grpc v1.60.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 )
-
-replace github.com/lupa95/passwork-client-go => ../passwork-client-go
