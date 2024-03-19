@@ -337,7 +337,9 @@ func ResponseToModel(response passwork.PasswordResponse) (PasswordResourceModel,
 	}
 
 	model.VaultId = types.StringValue(response.Data.VaultId)
-	model.FolderId = types.StringValue(response.Data.FolderId)
+	if response.Data.FolderId != "" {
+		model.FolderId = types.StringValue(response.Data.FolderId)
+	}
 	model.Id = types.StringValue(response.Data.Id)
 	model.Name = types.StringValue(response.Data.Name)
 	model.Login = types.StringValue(response.Data.Login)
