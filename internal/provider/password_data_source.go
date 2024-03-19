@@ -59,6 +59,9 @@ func (d *passwordDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 			"url": schema.StringAttribute{
 				Computed: true,
 			},
+			"description": schema.StringAttribute{
+				Computed: true,
+			},
 			"tags": schema.ListAttribute{
 				Computed:    true,
 				ElementType: types.StringType,
@@ -121,6 +124,7 @@ func (d *passwordDataSource) Read(ctx context.Context, req datasource.ReadReques
 	plan.Name = types.StringValue(getResponse.Data.Name)
 	plan.Login = types.StringValue(getResponse.Data.Login)
 	plan.Url = types.StringValue(getResponse.Data.Url)
+	plan.Description = types.StringValue(getResponse.Data.Description)
 	plan.Access = types.StringValue(getResponse.Data.Access)
 	plan.AccessCode = types.Int64Value(int64(getResponse.Data.AccessCode))
 	plan.Tags, _ = types.ListValueFrom(ctx, types.StringType, getResponse.Data.Tags)

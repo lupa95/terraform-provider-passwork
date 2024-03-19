@@ -23,13 +23,14 @@ type PasswordResourceModel struct {
 }
 
 type passwordDataSourceModel struct {
-	Name       types.String `tfsdk:"name"`
-	Id         types.String `tfsdk:"id"`
-	VaultId    types.String `tfsdk:"vault_id"`
-	Password   types.String `tfsdk:"password"`
-	Login      types.String `tfsdk:"login"`
-	Url        types.String `tfsdk:"url"`
-	Tags       types.List   `tfsdk:"tags"`
-	Access     types.String `tfsdk:"access"`
-	AccessCode types.Int64  `tfsdk:"access_code"`
+	Name        types.String `tfsdk:"name"`
+	Id          types.String `tfsdk:"id"`
+	VaultId     types.String `tfsdk:"vault_id"`
+	Password    types.String `tfsdk:"password"`
+	Description types.String `tfsdk:"description"`
+	Login       types.String `tfsdk:"login"`
+	Url         types.String `tfsdk:"url"`
+	Tags        types.List   `tfsdk:"tags"`
+	Access      types.String `tfsdk:"access"`
+	AccessCode  types.Int64  `tfsdk:"access_code"`
 }
