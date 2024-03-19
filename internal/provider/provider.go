@@ -42,10 +42,10 @@ func (p *PassworkProvider) Schema(ctx context.Context, req provider.SchemaReques
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"host": schema.StringAttribute{
-				Required: true,
+				Optional: true,
 			},
 			"api_key": schema.StringAttribute{
-				Required:  true,
+				Optional:  true,
 				Sensitive: true,
 			},
 		},
