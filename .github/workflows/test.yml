@@ -1,0 +1,94 @@
+# Terraform Provider testing workflow.
+name: Tests
+
+# This GitHub action runs your tests for each pull request and push.
+# Optionally, you can turn it on using a schedule for regular testing.
+on:
+  pull_request:
+    paths-ignore:
+      - 'README.md'
+      - 'CHANGELOG.md'
+      - 'LICENSE'
+  push:
+    paths-ignore:
+      - 'README.md'
+      - 'CHANGELOG.md'
+      - 'LICENSE'
+
+# Testing only needs permissions to read the repository contents.
+permissions:
+  contents: read
+
+jobs:
+  # Ensure project builds before running testing matrix
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    env:
+      GOPRIVATE: github.com/lupa95/passwork-client-go
+      GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4.1.1
+      - uses: actions/setup-go@v5.0.0
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+      - run: git config --global url.https://$GH_ACCESS_TOKEN@github.com/.insteadOf https://github.com/
+      - run: go mod download
+      - run: go build -v .
+      - name: Run linters
+        uses: golangci/golangci-lint-action@v4.0.0
+        with:
+          go-version: '1.21'
+          cache: false
+
+  generate:
+    runs-on: ubuntu-latest
+    env:
+      GOPRIVATE: github.com/lupa95/passwork-client-go
+      GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4.1.1
+      - uses: actions/setup-go@v5.0.0
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+      - run: go generate ./...
+      - name: git diff
+        run: |
+          git diff --compact-summary --exit-code || \
+            (echo; echo "Unexpected difference in directories after code generation. Run 'go generate ./...' command and commit."; exit 1)
+
+  # # Run acceptance tests in a matrix with Terraform CLI versions
+  # test:
+  #   name: Terraform Provider Acceptance Tests
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     GOPRIVATE: github.com/lupa95/passwork-client-go
+  #     GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
+  #   timeout-minutes: 15
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       # list whatever Terraform versions here you would like to support
+  #       terraform:
+  #         - '1.5.*'
+  #         - '1.6.*'
+  #         - '1.7.*'
+  #   steps:
+  #     - uses: actions/checkout@v4.1.1
+  #     - uses: actions/setup-go@v5.0.0
+  #       with:
+  #         go-version-file: 'go.mod'
+  #         cache: true
+  #     - uses: hashicorp/setup-terraform@633666f66e0061ca3b725c73b2ec20cd13a8fdd1 # v2.0.3
+  #       with:
+  #         terraform_version: ${{ matrix.terraform }}
+  #         terraform_wrapper: false
+  #     - run: go mod download
+  #     - env:
+  #         TF_ACC: "1"
+  #       run: go test -v -cover ./internal/provider/
+  #       timeout-minutes: 10
