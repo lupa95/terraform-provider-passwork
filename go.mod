@@ -8,7 +8,7 @@ require (
 	github.com/hashicorp/terraform-plugin-go v0.20.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/hashicorp/terraform-plugin-testing v1.6.0
-	github.com/lupa95/passwork-client-go v0.0.0-20240218093031-271b535ff507
+	github.com/lupa95/passwork-client-go v0.1.0
 )
 
 require (
