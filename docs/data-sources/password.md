@@ -24,6 +24,7 @@ description: |-
 
 - `access` (String)
 - `access_code` (Number, Sensitive)
+- `description` (String)
 - `id` (String) The ID of this resource.
 - `login` (String)
 - `password` (String, Sensitive)
