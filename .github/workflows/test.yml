@@ -29,8 +29,8 @@ jobs:
       GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+      - uses: actions/checkout@v4.1.1
+      - uses: actions/setup-go@v5.0.0
         with:
           go-version-file: 'go.mod'
           cache: true
@@ -38,9 +38,10 @@ jobs:
       - run: go mod download
       - run: go build -v .
       - name: Run linters
-        uses: golangci/golangci-lint-action@3a919529898de77ec3da873e3063ca4b10e7f5cc # v3.7.0
+        uses: golangci/golangci-lint-action@v4.0.0
         with:
-          version: latest
+          go-version: '1.21'
+          cache: false
 
   generate:
     runs-on: ubuntu-latest
@@ -48,8 +49,8 @@ jobs:
       GOPRIVATE: github.com/lupa95/passwork-client-go
       GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+      - uses: actions/checkout@v4.1.1
+      - uses: actions/setup-go@v5.0.0
         with:
           go-version-file: 'go.mod'
           cache: true
@@ -77,8 +78,8 @@ jobs:
   #         - '1.6.*'
   #         - '1.7.*'
   #   steps:
-  #     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-  #     - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+  #     - uses: actions/checkout@v4.1.1
+  #     - uses: actions/setup-go@v5.0.0
   #       with:
   #         go-version-file: 'go.mod'
   #         cache: true
