@@ -27,7 +27,7 @@ func testAccPreCheck(t *testing.T) {
 	if v := os.Getenv("PASSWORK_HOST"); v == "" {
 		t.Fatal("PASSWORK_HOST must be set for acceptance tests")
 	}
-	
+
 	if v := os.Getenv("PASSWORK_VAULT_ID"); v == "" {
 		t.Fatal("PASSWORK_VAULT_ID must be set for acceptance tests")
 	}
