@@ -34,3 +34,14 @@ type passwordDataSourceModel struct {
 	Access      types.String `tfsdk:"access"`
 	AccessCode  types.Int64  `tfsdk:"access_code"`
 }
+
+type VaultResourceModel struct {
+	Id             types.String `tfsdk:"id"`
+	Name           types.String `tfsdk:"name"`
+	MasterPassword types.String `tfsdk:"master_password"`
+	Access         types.String `tfsdk:"access"`
+	Scope          types.String `tfsdk:"scope"`
+	PasswordHash   types.String `tfsdk:"password_hash"`
+	Salt           types.String `tfsdk:"salt"`
+	isPrivate      types.Bool   `tfsdk:"is_private"`
+}
