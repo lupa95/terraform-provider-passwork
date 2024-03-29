@@ -15,7 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/lupa95/passwork-client-go"
 )
 
@@ -149,9 +148,6 @@ func (r *PasswordResource) Create(ctx context.Context, req resource.CreateReques
 		)
 		return
 	}
-	tflog.Debug(ctx, "DEBUG MESSAGE CREATE")
-	tflog.Debug(ctx, response.Data.Id)
-	tflog.Debug(ctx, response.Data.Name)
 
 	// Convert response to state
 	newState, err = ResponseToModel(response)
@@ -237,13 +233,9 @@ func (r *PasswordResource) Update(ctx context.Context, req resource.UpdateReques
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	tflog.Debug(ctx, "DEBUG MESSAGE UPDATE 0")
-	tflog.Debug(ctx, plan.Name.String())
 
 	// Create request from state
 	request = ModelToRequest(plan)
-	tflog.Debug(ctx, "DEBUG MESSAGE UPDATE 1")
-	tflog.Debug(ctx, request.Name)
 
 	// Send request
 	response, err = r.client.EditPassword(plan.Id.ValueString(), request)
@@ -254,9 +246,6 @@ func (r *PasswordResource) Update(ctx context.Context, req resource.UpdateReques
 		)
 		return
 	}
-	tflog.Debug(ctx, "DEBUG MESSAGE UPDATE")
-	tflog.Debug(ctx, response.Data.Id)
-	tflog.Debug(ctx, response.Data.Name)
 
 	// Convert response to state
 	newState, err = ResponseToModel(response)
