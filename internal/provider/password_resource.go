@@ -137,7 +137,7 @@ func (r *PasswordResource) Create(ctx context.Context, req resource.CreateReques
 	}
 
 	// Create request from model
-	request = ModelToRequest(plan)
+	request = PasswordModelToRequest(plan)
 
 	// Send request
 	response, err = r.client.AddPassword(request)
@@ -150,7 +150,7 @@ func (r *PasswordResource) Create(ctx context.Context, req resource.CreateReques
 	}
 
 	// Convert response to state
-	newState, err = ResponseToModel(response)
+	newState, err = PasswordResponseToModel(response)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error converting Password response into state",
@@ -201,7 +201,7 @@ func (r *PasswordResource) Read(ctx context.Context, req resource.ReadRequest, r
 	}
 
 	// Convert response to state
-	newState, err = ResponseToModel(response)
+	newState, err = PasswordResponseToModel(response)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error converting Password response into state",
@@ -235,7 +235,7 @@ func (r *PasswordResource) Update(ctx context.Context, req resource.UpdateReques
 	}
 
 	// Create request from state
-	request = ModelToRequest(plan)
+	request = PasswordModelToRequest(plan)
 
 	// Send request
 	response, err = r.client.EditPassword(plan.Id.ValueString(), request)
@@ -248,7 +248,7 @@ func (r *PasswordResource) Update(ctx context.Context, req resource.UpdateReques
 	}
 
 	// Convert response to state
-	newState, err = ResponseToModel(response)
+	newState, err = PasswordResponseToModel(response)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error converting Password response into state",
@@ -293,7 +293,7 @@ func (r *PasswordResource) ImportState(ctx context.Context, req resource.ImportS
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func ModelToRequest(model PasswordResourceModel) passwork.PasswordRequest {
+func PasswordModelToRequest(model PasswordResourceModel) passwork.PasswordRequest {
 	// Encode base64 password
 	cryptedPassword := base64.StdEncoding.EncodeToString([]byte(model.Password.ValueString()))
 
@@ -316,7 +316,7 @@ func ModelToRequest(model PasswordResourceModel) passwork.PasswordRequest {
 	return request
 }
 
-func ResponseToModel(response passwork.PasswordResponse) (PasswordResourceModel, error) {
+func PasswordResponseToModel(response passwork.PasswordResponse) (PasswordResourceModel, error) {
 	var model PasswordResourceModel
 
 	// Decode base64 password
