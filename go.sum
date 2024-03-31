@@ -136,6 +136,8 @@ github.com/kylelemons/godebug v1.1.0 h1:RPNrshWIDI6G2gRW9EHilWtl7Z6Sb1BR0xunSBf0
 github.com/kylelemons/godebug v1.1.0/go.mod h1:9/0rRGxNHcop5bhtWyNeEfOS8JIWk580+fNqagV/RAw=
 github.com/lupa95/passwork-client-go v0.1.0 h1:OY1JaVVYT93JHQ7f7YCu7q5z0cDQ/bZYE1QpllbPau8=
 github.com/lupa95/passwork-client-go v0.1.0/go.mod h1:QxU9ZzDz+71/1/xgJVa5x5hVR2MileZoEZftrXhRpBA=
+github.com/lupa95/passwork-client-go v0.1.1 h1:PjEN+EftOGhWT6GQCAD1+39Z+5u+F87hK/IfpHgRHHw=
+github.com/lupa95/passwork-client-go v0.1.1/go.mod h1:QxU9ZzDz+71/1/xgJVa5x5hVR2MileZoEZftrXhRpBA=
 github.com/mattn/go-colorable v0.0.9/go.mod h1:9vuHe8Xs5qXnSaW/c/ABM9alt+Vo+STaOChaDxuIBZU=
 github.com/mattn/go-colorable v0.1.9/go.mod h1:u6P/XSegPjTcexA+o6vUJrdnUu04hMope9wVRipJSqc=
 github.com/mattn/go-colorable v0.1.12/go.mod h1:u5H1YNBxpqRaxsYJYSkiCWKzEfiAb1Gb520KVy5xxl4=
