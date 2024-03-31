@@ -78,7 +78,7 @@ func (p *PassworkProvider) Configure(ctx context.Context, req provider.Configure
 			path.Root("api_key"),
 			"Unknown Passwork API Key",
 			"The provider cannot create the Passwork API client as there is an unknown configuration value for the Passwork API key. "+
-				"Either target apply the source of the value first, set the value statically in the configuration, or use the PASSWORK_APIKEY environment variable.",
+				"Either target apply the source of the value first, set the value statically in the configuration, or use the PASSWORK_API_KEY environment variable.",
 		)
 	}
 
@@ -90,7 +90,7 @@ func (p *PassworkProvider) Configure(ctx context.Context, req provider.Configure
 	// with Terraform configuration value if set.
 
 	host := os.Getenv("PASSWORK_HOST")
-	apiKey := os.Getenv("PASSWORK_APIKEY")
+	apiKey := os.Getenv("PASSWORK_API_KEY")
 
 	if !config.Host.IsNull() {
 		host = config.Host.ValueString()
@@ -117,8 +117,8 @@ func (p *PassworkProvider) Configure(ctx context.Context, req provider.Configure
 		resp.Diagnostics.AddAttributeError(
 			path.Root("api_key"),
 			"Missing Passwork API Key",
-			"The provider cannot create the Passwork API client as there is a missing or empty value for the Passwork API username. "+
-				"Set the api_key value in the configuration or use the PASSWORK_APIKEY environment variable. "+
+			"The provider cannot create the Passwork API client as there is a missing or empty value for the Passwork API key. "+
+				"Set the api_key value in the configuration or use the PASSWORK_API_KEY environment variable. "+
 				"If either is already set, ensure the value is not empty.",
 		)
 	}
@@ -134,7 +134,7 @@ func (p *PassworkProvider) Configure(ctx context.Context, req provider.Configure
 		resp.Diagnostics.AddError(
 			"Passwork API Login failed",
 			"Client was unable to login to Passwork. Please check if the api_key and host value on the configuration are correct."+
-				"If you use environment variables, please check if PASSWORK_APIKEY and PASSWORK_HOST are correct.",
+				"If you use environment variables, please check if PASSWORK_API_KEY and PASSWORK_HOST are correct.",
 		)
 	}
 
