@@ -160,20 +160,14 @@ func (r *VaultResource) Create(ctx context.Context, req resource.CreateRequest, 
 	}
 
 	// Convert response to state
-	newState.Id = types.StringValue(response_add.Data)
-	newState.Name = types.StringValue(request.Name)
-	newState.IsPrivate = types.BoolValue(!response_get.Data.Visible)
-	newState.Access = types.StringValue(response_get.Data.Access)
-	newState.Scope = types.StringValue(response_get.Data.Scope)
-	master_password, err := base64.StdEncoding.DecodeString(response_get.Data.VaultPasswordCrypted)
+	newState, err = VaultResponseToModel(response_get)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error decoding Vault master password.",
+			"Error converting Vault API response to state.",
 			"Could not update state with API response, unexpected error: "+err.Error(),
 		)
 		return
 	}
-	newState.MasterPassword = types.StringValue(string(master_password))
 
 	// Set refreshed state
 	diags = resp.State.Set(ctx, newState)
@@ -211,20 +205,14 @@ func (r *VaultResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	}
 
 	// Convert response to state
-	newState.Id = types.StringValue(response.Data.Id)
-	newState.Name = types.StringValue(response.Data.Name)
-	newState.IsPrivate = types.BoolValue(!response.Data.Visible)
-	newState.Access = types.StringValue(response.Data.Access)
-	newState.Scope = types.StringValue(response.Data.Scope)
-	master_password, err := base64.StdEncoding.DecodeString(response.Data.VaultPasswordCrypted)
+	newState, err = VaultResponseToModel(response)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error decoding Vault master password.",
+			"Error converting Vault API response to state.",
 			"Could not update state with API response, unexpected error: "+err.Error(),
 		)
 		return
 	}
-	newState.MasterPassword = types.StringValue(string(master_password))
 
 	// Set refreshed state
 	diags = resp.State.Set(ctx, &newState)
@@ -274,20 +262,14 @@ func (r *VaultResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	}
 
 	// Convert response to state
-	newState.Id = types.StringValue(response.Data)
-	newState.Name = types.StringValue(request.Name)
-	newState.IsPrivate = types.BoolValue(!response_get.Data.Visible)
-	newState.Access = types.StringValue(response_get.Data.Access)
-	newState.Scope = types.StringValue(response_get.Data.Scope)
-	master_password, err := base64.StdEncoding.DecodeString(response_get.Data.VaultPasswordCrypted)
+	newState, err = VaultResponseToModel(response_get)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error decoding Vault master password.",
+			"Error converting Vault API response to state.",
 			"Could not update state with API response, unexpected error: "+err.Error(),
 		)
 		return
 	}
-	newState.MasterPassword = types.StringValue(string(master_password))
 
 	// Set refreshed state
 	diags = resp.State.Set(ctx, newState)
@@ -337,4 +319,21 @@ func randomString(length int) string {
 		}
 	}
 	return string(result)
+}
+
+func VaultResponseToModel(response passwork.VaultResponse) (VaultResourceModel, error) {
+	var model VaultResourceModel
+
+	model.Id = types.StringValue(response.Data.Id)
+	model.Name = types.StringValue(response.Data.Name)
+	model.IsPrivate = types.BoolValue(!response.Data.Visible)
+	model.Access = types.StringValue(response.Data.Access)
+	model.Scope = types.StringValue(response.Data.Scope)
+	master_password, err := base64.StdEncoding.DecodeString(response.Data.VaultPasswordCrypted)
+	if err != nil {
+		return model, err
+	}
+	model.MasterPassword = types.StringValue(string(master_password))
+
+	return model, nil
 }
