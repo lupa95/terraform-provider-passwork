@@ -41,7 +41,5 @@ type VaultResourceModel struct {
 	MasterPassword types.String `tfsdk:"master_password"`
 	Access         types.String `tfsdk:"access"`
 	Scope          types.String `tfsdk:"scope"`
-	PasswordHash   types.String `tfsdk:"password_hash"`
-	Salt           types.String `tfsdk:"salt"`
-	isPrivate      types.Bool   `tfsdk:"is_private"`
+	IsPrivate      types.Bool   `tfsdk:"is_private"`
 }

@@ -13,6 +13,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/lupa95/passwork-client-go"
 )
@@ -45,30 +49,38 @@ func (r *VaultResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 			"id": schema.StringAttribute{
 				MarkdownDescription: "ID of the Vault",
 				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"access": schema.StringAttribute{
 				MarkdownDescription: "Access of the Vault",
 				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"scope": schema.StringAttribute{
 				MarkdownDescription: "Scope of the Vault",
 				Computed:            true,
-			},
-			"password_hash": schema.StringAttribute{
-				MarkdownDescription: "Password hash of the Vault",
-				Optional:            true,
-			},
-			"salt": schema.StringAttribute{
-				MarkdownDescription: "Salt of the Vault",
-				Optional:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"is_private": schema.BoolAttribute{
 				MarkdownDescription: "Create a private vault.",
 				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(true),
+				PlanModifiers:       []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
 			},
 			"master_password": schema.StringAttribute{
 				MarkdownDescription: "Master password of the Vault",
 				Optional:            true,
+				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 		},
 	}
@@ -95,11 +107,12 @@ func (r *VaultResource) Configure(ctx context.Context, req resource.ConfigureReq
 
 func (r *VaultResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var (
-		plan     VaultResourceModel
-		newState VaultResourceModel
-		request  passwork.VaultAddRequest
-		response passwork.VaultOperationResponse
-		err      error
+		plan         VaultResourceModel
+		newState     VaultResourceModel
+		request      passwork.VaultAddRequest
+		response_add passwork.VaultOperationResponse
+		response_get passwork.VaultResponse
+		err          error
 	)
 
 	// Retrieve values from plan
@@ -111,8 +124,13 @@ func (r *VaultResource) Create(ctx context.Context, req resource.CreateRequest, 
 
 	// Build request
 	request.Name = plan.Name.ValueString()
-	request.IsPrivate = plan.isPrivate.ValueBool()
-	if plan.MasterPassword.IsNull() {
+	request.IsPrivate = plan.IsPrivate.ValueBool()
+
+	// Not returned by API, set and forget after creating. Not tracked in state
+	request.Salt = randomString(12)
+	request.PasswordHash = base64.StdEncoding.EncodeToString([]byte(randomString(12)))
+
+	if plan.MasterPassword.IsUnknown() {
 		mp := randomString(12)
 		request.MpCrypted = base64.StdEncoding.EncodeToString([]byte(mp))
 		newState.MasterPassword = types.StringValue(mp)
@@ -120,36 +138,42 @@ func (r *VaultResource) Create(ctx context.Context, req resource.CreateRequest, 
 		request.MpCrypted = base64.StdEncoding.EncodeToString([]byte(plan.MasterPassword.ValueString()))
 		newState.MasterPassword = plan.MasterPassword
 	}
-	if plan.Salt.IsNull() {
-		salt := randomString(12)
-		request.Salt = salt
-		newState.Salt = types.StringValue(salt)
-	} else {
-		request.Salt = plan.Salt.ValueString()
-		newState.Salt = plan.Salt
-	}
-	if plan.PasswordHash.IsNull() {
-		pasword_hash := randomString(12)
-		request.PasswordHash = base64.StdEncoding.EncodeToString([]byte(pasword_hash))
-		newState.PasswordHash = types.StringValue(pasword_hash)
-	} else {
-		request.PasswordHash = base64.StdEncoding.EncodeToString([]byte(plan.PasswordHash.ValueString()))
-		newState.PasswordHash = plan.PasswordHash
-	}
 
-	// Send request
-	response, err = r.client.AddVault(request)
+	// Send create request
+	response_add, err = r.client.AddVault(request)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error Creating Vault",
-			"Could not update Vault, unexpected error: "+err.Error(),
+			"Could not create Vault, unexpected error: "+err.Error(),
+		)
+		return
+	}
+
+	// Send get request to get all fields
+	response_get, err = r.client.GetVault(response_add.Data)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Creating Vault",
+			"Could not create Vault, unexpected error: "+err.Error(),
 		)
 		return
 	}
 
 	// Convert response to state
-	newState.Id = types.StringValue(response.Data)
+	newState.Id = types.StringValue(response_add.Data)
 	newState.Name = types.StringValue(request.Name)
+	newState.IsPrivate = types.BoolValue(!response_get.Data.Visible)
+	newState.Access = types.StringValue(response_get.Data.Access)
+	newState.Scope = types.StringValue(response_get.Data.Scope)
+	master_password, err := base64.StdEncoding.DecodeString(response_get.Data.VaultPasswordCrypted)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error decoding Vault master password.",
+			"Could not update state with API response, unexpected error: "+err.Error(),
+		)
+		return
+	}
+	newState.MasterPassword = types.StringValue(string(master_password))
 
 	// Set refreshed state
 	diags = resp.State.Set(ctx, newState)
@@ -187,11 +211,11 @@ func (r *VaultResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	}
 
 	// Convert response to state
-	newState.Name = types.StringValue(response.Data.Name)
 	newState.Id = types.StringValue(response.Data.Id)
+	newState.Name = types.StringValue(response.Data.Name)
+	newState.IsPrivate = types.BoolValue(!response.Data.Visible)
 	newState.Access = types.StringValue(response.Data.Access)
 	newState.Scope = types.StringValue(response.Data.Scope)
-
 	master_password, err := base64.StdEncoding.DecodeString(response.Data.VaultPasswordCrypted)
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -212,11 +236,12 @@ func (r *VaultResource) Read(ctx context.Context, req resource.ReadRequest, resp
 
 func (r *VaultResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var (
-		plan     VaultResourceModel
-		newState VaultResourceModel
-		request  passwork.VaultEditRequest
-		response passwork.VaultOperationResponse
-		err      error
+		plan         VaultResourceModel
+		newState     VaultResourceModel
+		request      passwork.VaultEditRequest
+		response     passwork.VaultOperationResponse
+		response_get passwork.VaultResponse
+		err          error
 	)
 
 	// Retrieve values from plan
@@ -238,9 +263,31 @@ func (r *VaultResource) Update(ctx context.Context, req resource.UpdateRequest, 
 		return
 	}
 
+	// Send get request to get all fields
+	response_get, err = r.client.GetVault(response.Data)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Creating Vault",
+			"Could not create Vault, unexpected error: "+err.Error(),
+		)
+		return
+	}
+
 	// Convert response to state
-	newState.Name = plan.Name
 	newState.Id = types.StringValue(response.Data)
+	newState.Name = types.StringValue(request.Name)
+	newState.IsPrivate = types.BoolValue(!response_get.Data.Visible)
+	newState.Access = types.StringValue(response_get.Data.Access)
+	newState.Scope = types.StringValue(response_get.Data.Scope)
+	master_password, err := base64.StdEncoding.DecodeString(response_get.Data.VaultPasswordCrypted)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error decoding Vault master password.",
+			"Could not update state with API response, unexpected error: "+err.Error(),
+		)
+		return
+	}
+	newState.MasterPassword = types.StringValue(string(master_password))
 
 	// Set refreshed state
 	diags = resp.State.Set(ctx, newState)
