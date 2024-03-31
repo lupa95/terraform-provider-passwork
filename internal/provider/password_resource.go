@@ -15,7 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/lupa95/passwork-client-go"
 )
 
@@ -138,7 +137,7 @@ func (r *PasswordResource) Create(ctx context.Context, req resource.CreateReques
 	}
 
 	// Create request from model
-	request = ModelToRequest(plan)
+	request = PasswordModelToRequest(plan)
 
 	// Send request
 	response, err = r.client.AddPassword(request)
@@ -149,12 +148,9 @@ func (r *PasswordResource) Create(ctx context.Context, req resource.CreateReques
 		)
 		return
 	}
-	tflog.Debug(ctx, "DEBUG MESSAGE CREATE")
-	tflog.Debug(ctx, response.Data.Id)
-	tflog.Debug(ctx, response.Data.Name)
 
 	// Convert response to state
-	newState, err = ResponseToModel(response)
+	newState, err = PasswordResponseToModel(response)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error converting Password response into state",
@@ -205,7 +201,7 @@ func (r *PasswordResource) Read(ctx context.Context, req resource.ReadRequest, r
 	}
 
 	// Convert response to state
-	newState, err = ResponseToModel(response)
+	newState, err = PasswordResponseToModel(response)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error converting Password response into state",
@@ -237,13 +233,9 @@ func (r *PasswordResource) Update(ctx context.Context, req resource.UpdateReques
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	tflog.Debug(ctx, "DEBUG MESSAGE UPDATE 0")
-	tflog.Debug(ctx, plan.Name.String())
 
 	// Create request from state
-	request = ModelToRequest(plan)
-	tflog.Debug(ctx, "DEBUG MESSAGE UPDATE 1")
-	tflog.Debug(ctx, request.Name)
+	request = PasswordModelToRequest(plan)
 
 	// Send request
 	response, err = r.client.EditPassword(plan.Id.ValueString(), request)
@@ -254,12 +246,9 @@ func (r *PasswordResource) Update(ctx context.Context, req resource.UpdateReques
 		)
 		return
 	}
-	tflog.Debug(ctx, "DEBUG MESSAGE UPDATE")
-	tflog.Debug(ctx, response.Data.Id)
-	tflog.Debug(ctx, response.Data.Name)
 
 	// Convert response to state
-	newState, err = ResponseToModel(response)
+	newState, err = PasswordResponseToModel(response)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error converting Password response into state",
@@ -304,7 +293,7 @@ func (r *PasswordResource) ImportState(ctx context.Context, req resource.ImportS
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func ModelToRequest(model PasswordResourceModel) passwork.PasswordRequest {
+func PasswordModelToRequest(model PasswordResourceModel) passwork.PasswordRequest {
 	// Encode base64 password
 	cryptedPassword := base64.StdEncoding.EncodeToString([]byte(model.Password.ValueString()))
 
@@ -327,7 +316,7 @@ func ModelToRequest(model PasswordResourceModel) passwork.PasswordRequest {
 	return request
 }
 
-func ResponseToModel(response passwork.PasswordResponse) (PasswordResourceModel, error) {
+func PasswordResponseToModel(response passwork.PasswordResponse) (PasswordResourceModel, error) {
 	var model PasswordResourceModel
 
 	// Decode base64 password
