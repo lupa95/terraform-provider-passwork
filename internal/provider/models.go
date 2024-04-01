@@ -2,11 +2,6 @@ package provider
 
 import "github.com/hashicorp/terraform-plugin-framework/types"
 
-type PasswordResponseModel struct {
-	Status types.String
-	Data   PasswordResourceModel
-}
-
 type PasswordResourceModel struct {
 	VaultId     types.String   `tfsdk:"vault_id"`
 	FolderId    types.String   `tfsdk:"folder_id"`
