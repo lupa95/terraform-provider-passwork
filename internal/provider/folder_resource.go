@@ -48,15 +48,8 @@ func (r *FolderResource) Schema(ctx context.Context, req resource.SchemaRequest,
 				},
 			},
 			"parent_id": schema.StringAttribute{
-				MarkdownDescription: "Parent ID of the folder (parent folder)",
-				Computed:            true,
-			},
-			"access": schema.StringAttribute{
-				MarkdownDescription: "Access of the folder",
-				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
+				MarkdownDescription: "Parent folder ID.",
+				Optional:            true,
 			},
 		},
 	}

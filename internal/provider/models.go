@@ -44,5 +44,4 @@ type FolderResourceModel struct {
 	VaultId  types.String `tfsdk:"vault_id"`
 	Id       types.String `tfsdk:"id"`
 	ParentId types.String `tfsdk:"parent_id"`
-	Access   types.String `tfsdk:"access"`
 }
