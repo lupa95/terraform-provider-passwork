@@ -146,6 +146,7 @@ func (p *PassworkProvider) Configure(ctx context.Context, req provider.Configure
 
 func (p *PassworkProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		NewFolderResource,
 		NewPasswordResource,
 		NewVaultResource,
 	}
