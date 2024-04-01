@@ -43,3 +43,11 @@ type VaultResourceModel struct {
 	Scope          types.String `tfsdk:"scope"`
 	IsPrivate      types.Bool   `tfsdk:"is_private"`
 }
+
+type FolderResourceModel struct {
+	Name     types.String `tfsdk:"name"`
+	VaultId  types.String `tfsdk:"vault_id"`
+	Id       types.String `tfsdk:"id"`
+	ParentId types.String `tfsdk:"parent_id"`
+	Access   types.String `tfsdk:"access"`
+}
