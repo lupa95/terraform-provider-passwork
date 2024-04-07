@@ -27,7 +27,7 @@ type FolderResource struct {
 }
 
 func (r *FolderResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_password"
+	resp.TypeName = req.ProviderTypeName + "_folder"
 }
 
 func (r *FolderResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -227,10 +227,16 @@ func (r *FolderResource) ImportState(ctx context.Context, req resource.ImportSta
 }
 
 func FolderResponseToModel(response passwork.FolderResponse) FolderResourceModel {
-	return FolderResourceModel{
-		Name:     types.StringValue(response.Data.Name),
-		Id:       types.StringValue(response.Data.Id),
-		VaultId:  types.StringValue(response.Data.VaultId),
-		ParentId: types.StringValue(response.Data.ParentId),
+	folder := FolderResourceModel{
+		Name:    types.StringValue(response.Data.Name),
+		Id:      types.StringValue(response.Data.Id),
+		VaultId: types.StringValue(response.Data.VaultId),
 	}
+
+	// Client SDK returns empty string if there is no parent ID. Set to null in Terraform
+	if response.Data.ParentId != "" {
+		folder.ParentId = types.StringValue(response.Data.ParentId)
+	}
+
+	return folder
 }
