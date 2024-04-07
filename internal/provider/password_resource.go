@@ -335,7 +335,10 @@ func PasswordResponseToModel(response passwork.PasswordResponse) (PasswordResour
 	model.Password = types.StringValue(string(decryptedPassword))
 	model.Description = types.StringValue(response.Data.Description)
 	model.Url = types.StringValue(response.Data.Url)
-	model.Color = types.Int64Value(int64(response.Data.Color))
+	// No color chosen: API returns 0
+	if response.Data.Color != 0 {
+		model.Color = types.Int64Value(int64(response.Data.Color))
+	}
 	for _, tag := range response.Data.Tags {
 		model.Tags = append(model.Tags, types.StringValue(tag))
 	}
