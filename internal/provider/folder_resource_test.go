@@ -52,14 +52,14 @@ resource "passwork_vault" "test" {
 }
 
 resource "passwork_folder" "test" {
-	name       = %[1]q
-	vault_id   = passwork_vault.test.id
+	name     = %[1]q
+	vault_id = passwork_vault.test.id
 }
 
 resource "passwork_folder" "test_nested" {
-	name       = "provider-test-folder-nested"
-	vault_id   = passwork_folder.test.vault_id
-	parent_id  = passwork_folder.test.id
+	name      = "provider-test-folder-nested"
+	vault_id  = passwork_folder.test.vault_id
+	parent_id = passwork_folder.test.id
 }
 `, folderName)
 }
