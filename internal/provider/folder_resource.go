@@ -140,8 +140,8 @@ func (r *FolderResource) Read(ctx context.Context, req resource.ReadRequest, res
 	response, err = r.client.GetFolder(state.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error reading folder",
-			"Could not read folder, unexpected error: "+err.Error(),
+			"Error deleting folder",
+			"Could not delete folder, unexpected error: "+err.Error(),
 		)
 		return
 	}
@@ -158,9 +158,68 @@ func (r *FolderResource) Read(ctx context.Context, req resource.ReadRequest, res
 }
 
 func (r *FolderResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var (
+		plan     FolderResourceModel
+		newState FolderResourceModel
+		request  passwork.FolderRequest
+		response passwork.FolderResponse
+		err      error
+	)
+
+	// Retrieve values from plan
+	diags := req.Plan.Get(ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Build request
+	request.Name = plan.Name.ValueString()
+
+	// Send request
+	response, err = r.client.EditFolder(plan.Id.ValueString(), request)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Updating folder",
+			"Could not update folder, unexpected error: "+err.Error(),
+		)
+		return
+	}
+
+	// Convert response to model
+	newState = FolderResponseToModel(response)
+
+	// Set refreshed state
+	diags = resp.State.Set(ctx, newState)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 }
 
 func (r *FolderResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var (
+		plan FolderResourceModel
+		err  error
+	)
+
+	// Retrieve values from plan
+	diags := req.State.Get(ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Send request
+	_, err = r.client.DeleteFolder(plan.Id.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Updating folder",
+			"Could not update folder, unexpected error: "+err.Error(),
+		)
+		return
+	}
 }
 
 func (r *FolderResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
