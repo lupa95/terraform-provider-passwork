@@ -78,6 +78,7 @@ func (r *VaultResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 				MarkdownDescription: "Master password of the Vault",
 				Optional:            true,
 				Computed:            true,
+				Sensitive:           true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
