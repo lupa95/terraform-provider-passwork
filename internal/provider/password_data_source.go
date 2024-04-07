@@ -94,14 +94,11 @@ func (d *passwordDataSource) Read(ctx context.Context, req datasource.ReadReques
 	}
 
 	ctx = tflog.SetField(ctx, "state id", plan.Id)
-	tflog.Debug(ctx, "Printing ID")
 
 	// If id is missing, search by name
 	if !plan.Id.IsNull() {
-		tflog.Debug(ctx, "here1")
 		getResponse, _ = d.client.GetPassword(plan.Id.ValueString())
 	} else if plan.Id.IsNull() && !plan.Name.IsNull() {
-		tflog.Debug(ctx, "here2")
 		searchRequest.Query = plan.Name.ValueString()
 		searchResponse, _ := d.client.SearchPassword(searchRequest)
 		getResponse, _ = d.client.GetPassword(searchResponse.Data[0].Id)
@@ -115,7 +112,6 @@ func (d *passwordDataSource) Read(ctx context.Context, req datasource.ReadReques
 		os.Exit(1)
 	}
 	ctx = tflog.SetField(ctx, "password", string(decryptedPassword))
-	tflog.Debug(ctx, "Printing password")
 
 	// Update State
 	plan.Password = types.StringValue(string(decryptedPassword))
