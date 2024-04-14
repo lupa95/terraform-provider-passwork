@@ -22,7 +22,7 @@ Vault resource
 ### Optional
 
 - `is_private` (Boolean) Create a private vault.
-- `master_password` (String, Sensitive) Master password of the Vault
+- `master_password` (String) Master password of the Vault
 
 ### Read-Only
 
