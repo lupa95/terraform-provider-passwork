@@ -6,6 +6,7 @@ terraform.tfplan
 terraform.tfstate
 terraform.tfvars
 .terraform.lock.hcl
+.tfvars
 bin/
 dist/
 modules-dev/
