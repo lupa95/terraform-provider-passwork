@@ -37,65 +37,65 @@ func (r *PasswordResource) Metadata(ctx context.Context, req resource.MetadataRe
 
 func (r *PasswordResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Password resource",
+		Description: "Use this resource to create a password entry. Passwords need to be stored inside a vault.",
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
-				MarkdownDescription: "Name of the Password entry",
-				Required:            true,
+				Description: "The name of the password entry.",
+				Required:    true,
 			},
 			"vault_id": schema.StringAttribute{
-				MarkdownDescription: "Name of the Password entry",
-				Required:            true,
+				Description: "The Id of the vault, which the password entry should be stored in.",
+				Required:    true,
 			},
 			"id": schema.StringAttribute{
-				MarkdownDescription: "ID of the Password entry",
-				Computed:            true,
+				Description: "The Id of the password entry.",
+				Computed:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"access": schema.StringAttribute{
-				MarkdownDescription: "Access of the Password entry",
-				Computed:            true,
+				Description: "The type of access of the password entry.",
+				Computed:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"access_code": schema.Int64Attribute{
-				MarkdownDescription: "Access of the Password entry",
-				Computed:            true,
+				Description: "The access code of the password entry.",
+				Computed:    true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
 			},
 			"login": schema.StringAttribute{
-				MarkdownDescription: "Login of the Password entry",
-				Optional:            true,
+				Description: "The Login of the password entry.",
+				Optional:    true,
 			},
 			"password": schema.StringAttribute{
-				MarkdownDescription: "Password value of the Password entry",
-				Optional:            true,
+				Description: "The password value of the password entry.",
+				Optional:    true,
 			},
 			"url": schema.StringAttribute{
-				MarkdownDescription: "Url value of the Password entry",
-				Optional:            true,
+				Description: "The URL of the password entry.",
+				Optional:    true,
 			},
 			"description": schema.StringAttribute{
-				MarkdownDescription: "Description value of the Password entry",
-				Optional:            true,
+				Description: "The description of the password entry.",
+				Optional:    true,
 			},
 			"color": schema.Int64Attribute{
-				MarkdownDescription: "Color number of the Password entry",
-				Optional:            true,
+				Description: "The color code of the password entry.",
+				Optional:    true,
 			},
 			"tags": schema.ListAttribute{
-				MarkdownDescription: "Tags of the Password entry",
-				ElementType:         types.StringType,
-				Optional:            true,
+				Description: "The list of tags, which are assigned to the password entry.",
+				ElementType: types.StringType,
+				Optional:    true,
 			},
 			"folder_id": schema.StringAttribute{
-				MarkdownDescription: "Folder ID of the of the Password entry",
-				Optional:            true,
+				Description: "The Id of the folder, which the password entry should be stored in.",
+				Optional:    true,
 			},
 		},
 	}

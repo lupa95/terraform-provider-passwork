@@ -40,16 +40,16 @@ func (p *PassworkProvider) Metadata(ctx context.Context, req provider.MetadataRe
 
 func (p *PassworkProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Passwork provider provides resources for interacting with the password manager Passwork.",
+		Description: "The Passwork provider provides resources for managing password resources on the password manager Passwork.",
 		Attributes: map[string]schema.Attribute{
 			"host": schema.StringAttribute{
-				Description: "The Passwork instance's API URL. This can also be source froim the `PASSWORK_HOST` environment variable.",
+				Description: "The Passwork instance's API URL (i.e. https://my-passwork.mydomain.example/api/v4). This can alternatively be sourced from the `PASSWORK_HOST` environment variable.",
 				Optional:    true,
 			},
 			"api_key": schema.StringAttribute{
-				MarkdownDescription: "The Passwork API key which should be used. This can also be source froim the `PASSWORK_API_KEY` environment variable.",
-				Optional:            true,
-				Sensitive:           true,
+				Description: "The Passwork API key which should be used for authentication. This can alternatively be sourced from the `PASSWORK_API_KEY` environment variable.",
+				Optional:    true,
+				Sensitive:   true,
 			},
 		},
 	}
