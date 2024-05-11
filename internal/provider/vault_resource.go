@@ -40,44 +40,45 @@ func (r *VaultResource) Metadata(ctx context.Context, req resource.MetadataReque
 
 func (r *VaultResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Vault resource",
+		Description: "Use this resource to create a vault. Vaults are top level containers, that contain password entries.",
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
-				MarkdownDescription: "Name of Vault",
-				Required:            true,
+				Description: "The name of the vault.",
+				Required:    true,
 			},
 			"id": schema.StringAttribute{
-				MarkdownDescription: "ID of the Vault",
-				Computed:            true,
+				Description: "The Id of the vault.",
+				Computed:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"access": schema.StringAttribute{
-				MarkdownDescription: "Access of the Vault",
-				Computed:            true,
+				Description: "The type of access of the vault.",
+				Computed:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"scope": schema.StringAttribute{
-				MarkdownDescription: "Scope of the Vault",
-				Computed:            true,
+				Description: "The scope of the vault.",
+				Computed:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"is_private": schema.BoolAttribute{
-				MarkdownDescription: "Create a private vault.",
-				Optional:            true,
-				Computed:            true,
-				Default:             booldefault.StaticBool(true),
-				PlanModifiers:       []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
+				Description:   "Enable to create a private vault. A private vault is only visiable to the user, who created it.",
+				Optional:      true,
+				Computed:      true,
+				Default:       booldefault.StaticBool(true),
+				PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
 			},
 			"master_password": schema.StringAttribute{
-				MarkdownDescription: "Master password of the Vault",
-				Optional:            true,
-				Computed:            true,
+				Description: "The master password of the vault.",
+				Optional:    true,
+				Computed:    true,
+				Sensitive:   true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},

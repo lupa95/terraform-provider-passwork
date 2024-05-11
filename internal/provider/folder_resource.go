@@ -32,26 +32,26 @@ func (r *FolderResource) Metadata(ctx context.Context, req resource.MetadataRequ
 
 func (r *FolderResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Folder resource",
+		Description: "Use this resource to create a folder. Folders can be used to organize password entries. Folders need to be create inside a vault.",
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
-				MarkdownDescription: "Name of the folder",
-				Required:            true,
+				Description: "The name of the folder entry.",
+				Required:    true,
 			},
 			"vault_id": schema.StringAttribute{
-				MarkdownDescription: "Vault ID of the folder",
-				Required:            true,
+				Description: "The Id of the vault, which the folder should be created in.",
+				Required:    true,
 			},
 			"id": schema.StringAttribute{
-				MarkdownDescription: "ID of the folder",
-				Computed:            true,
+				Description: "The Id of the folder.",
+				Computed:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"parent_id": schema.StringAttribute{
-				MarkdownDescription: "Parent folder ID.",
-				Optional:            true,
+				Description: "The Id of the parent folder of the folder. Omit if this should be a top level folder.",
+				Optional:    true,
 			},
 		},
 	}

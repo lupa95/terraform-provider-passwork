@@ -4,15 +4,12 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"log"
-	"os"
 
 	"github.com/lupa95/passwork-client-go"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -39,39 +36,50 @@ func (d *passwordDataSource) Metadata(_ context.Context, req datasource.Metadata
 // Schema defines the schema for the data source.
 func (d *passwordDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: "Use this data source to get information about a password entry. Passwords entries can either be selected by Id or searched for by name.",
 		Attributes: map[string]schema.Attribute{
-			"name": schema.StringAttribute{
-				Required: true,
+			"vault_id": schema.StringAttribute{
+				Required:    true,
+				Description: "The Id of the vault, which the password entry is stored in.",
 			},
 			"id": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
+				MarkdownDescription: "The Id of the password entry. Either `id` or `name` must be set.",
 			},
-			"vault_id": schema.StringAttribute{
-				Required: true,
+			"name": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "The name of the password entry. Either `id` or `name` must be set.",
 			},
 			"password": schema.StringAttribute{
-				Computed:  true,
-				Sensitive: true,
+				Computed:    true,
+				Sensitive:   true,
+				Description: "The password value of the password entry.",
 			},
 			"login": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: "The Login of the password entry.",
 			},
 			"url": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: "The URL of the password entry.",
 			},
 			"description": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: "The description of the password entry.",
 			},
 			"tags": schema.ListAttribute{
 				Computed:    true,
 				ElementType: types.StringType,
+				Description: "The list of tags, which are assigned to the password entry.",
 			},
 			"access": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: "The type of access of the password entry.",
 			},
 			"access_code": schema.Int64Attribute{
-				Computed:  true,
-				Sensitive: true,
+				Computed:    true,
+				Sensitive:   true,
+				Description: "The access code of the password entry.",
 			},
 		},
 	}
@@ -93,8 +101,6 @@ func (d *passwordDataSource) Read(ctx context.Context, req datasource.ReadReques
 		VaultId: plan.VaultId.ValueString(),
 	}
 
-	ctx = tflog.SetField(ctx, "state id", plan.Id)
-
 	// If id is missing, search by name
 	if !plan.Id.IsNull() {
 		getResponse, _ = d.client.GetPassword(plan.Id.ValueString())
@@ -102,16 +108,23 @@ func (d *passwordDataSource) Read(ctx context.Context, req datasource.ReadReques
 		searchRequest.Query = plan.Name.ValueString()
 		searchResponse, _ := d.client.SearchPassword(searchRequest)
 		getResponse, _ = d.client.GetPassword(searchResponse.Data[0].Id)
+	} else {
+		resp.Diagnostics.AddError(
+			"Error Reading Passwork Password",
+			"Please either provide id or name argument.",
+		)
+		return
 	}
-	ctx = tflog.SetField(ctx, "getResponse", getResponse)
 
 	// Decode base64 password
 	decryptedPassword, err := base64.StdEncoding.DecodeString(getResponse.Data.CryptedPassword)
 	if err != nil {
-		log.Fatal(err)
-		os.Exit(1)
+		resp.Diagnostics.AddError(
+			"Error Reading Passwork Password",
+			"Could not decode Passwork Password "+err.Error(),
+		)
+		return
 	}
-	ctx = tflog.SetField(ctx, "password", string(decryptedPassword))
 
 	// Update State
 	plan.Password = types.StringValue(string(decryptedPassword))
