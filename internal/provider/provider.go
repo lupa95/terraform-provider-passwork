@@ -45,7 +45,7 @@ func (p *PassworkProvider) Schema(ctx context.Context, req provider.SchemaReques
 		Description: "The Passwork provider provides resources for managing password resources on the password manager Passwork.",
 		Attributes: map[string]schema.Attribute{
 			"host": schema.StringAttribute{
-				Description: "The Passwork instance's API URL (i.e. https://my-passwork.mydomain.example/api/v4). This can alternatively be sourced from the `PASSWORK_HOST` environment variable.",
+				Description: "The Passwork instance's API URL (i.e. https://my-passwork-instance.com). This can alternatively be sourced from the `PASSWORK_HOST` environment variable.",
 				Optional:    true,
 			},
 			"api_key": schema.StringAttribute{
@@ -143,7 +143,8 @@ func (p *PassworkProvider) Configure(ctx context.Context, req provider.Configure
 
 	// Create a new Passwork client using the configuration values
 	timeout_duration := time.Duration(timeout) * time.Second
-	client := passwork.NewClient(host, apiKey, timeout_duration)
+	url := host + "/api/v4"
+	client := passwork.NewClient(url, apiKey, timeout_duration)
 	err := client.Login()
 	if err != nil {
 		resp.Diagnostics.AddError(

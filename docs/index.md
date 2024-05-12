@@ -21,8 +21,8 @@ terraform {
 }
 
 provider "passwork" {
-  host    = "https://my-passwork-instance.com/api/v4" # Can be sourced from the environment variable PASSWORK_HOST
-  api_key = "my-api-key"                              # Can be sourced from the environment variable PASSWORK_API_KEY
+  host    = "https://my-passwork-instance.com" # Can be sourced from the environment variable PASSWORK_HOST
+  api_key = "my-api-key"                       # Can be sourced from the environment variable PASSWORK_API_KEY
 }
 
 resource "passwork_vault" "example" {
@@ -54,7 +54,7 @@ The provider supports authentication via an API key. Users can retrieve an API k
 ### Optional
 
 - `api_key` (String, Sensitive) The Passwork API key which should be used for authentication. This can alternatively be sourced from the `PASSWORK_API_KEY` environment variable.
-- `host` (String) The Passwork instance's API URL (i.e. https://my-passwork.mydomain.example/api/v4). This can alternatively be sourced from the `PASSWORK_HOST` environment variable.
+- `host` (String) The Passwork instance's API URL (i.e. https://my-passwork-instance.com). This can alternatively be sourced from the `PASSWORK_HOST` environment variable.
 
 ## Development
 
@@ -91,7 +91,7 @@ Running tests requires access to a Passwork instance.
 1. Setup Provider configuration: 
 ```bash
 export PASSWORK_API_KEY=<replace-with-api-key>
-export PASSWORK_HOST=https://<replace-with-URL>/api/v4
+export PASSWORK_HOST=https://<replace-with-URL>
 export PASSWORK_VAULT_ID=<replace with ID of existing Vault> # Required for data source testing
 ```
 
