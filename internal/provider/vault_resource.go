@@ -327,7 +327,6 @@ func VaultResponseToModel(response passwork.VaultResponse) (VaultResourceModel, 
 
 	model.Id = types.StringValue(response.Data.Id)
 	model.Name = types.StringValue(response.Data.Name)
-	model.IsPrivate = types.BoolValue(!response.Data.Visible)
 	model.Access = types.StringValue(response.Data.Access)
 	model.Scope = types.StringValue(response.Data.Scope)
 	master_password, err := base64.StdEncoding.DecodeString(response.Data.VaultPasswordCrypted)
@@ -336,5 +335,10 @@ func VaultResponseToModel(response passwork.VaultResponse) (VaultResourceModel, 
 	}
 	model.MasterPassword = types.StringValue(string(master_password))
 
+	if model.Scope.ValueString() == "user" {
+		model.IsPrivate = types.BoolValue(true)
+	} else {
+		model.IsPrivate = types.BoolValue(false)
+	}
 	return model, nil
 }

@@ -6,6 +6,7 @@ package provider
 import (
 	"context"
 	"os"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -31,6 +32,7 @@ type PassworkProvider struct {
 type passworkProviderModel struct {
 	Host    types.String `tfsdk:"host"`
 	Api_key types.String `tfsdk:"api_key"`
+	Timeout types.Int64  `tfsdk:"timeout"`
 }
 
 func (p *PassworkProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -43,13 +45,17 @@ func (p *PassworkProvider) Schema(ctx context.Context, req provider.SchemaReques
 		Description: "The Passwork provider provides resources for managing password resources on the password manager Passwork.",
 		Attributes: map[string]schema.Attribute{
 			"host": schema.StringAttribute{
-				Description: "The Passwork instance's API URL (i.e. https://my-passwork.mydomain.example/api/v4). This can alternatively be sourced from the `PASSWORK_HOST` environment variable.",
+				Description: "The Passwork instance's API URL (i.e. https://my-passwork-instance.com). This can alternatively be sourced from the `PASSWORK_HOST` environment variable.",
 				Optional:    true,
 			},
 			"api_key": schema.StringAttribute{
 				Description: "The Passwork API key which should be used for authentication. This can alternatively be sourced from the `PASSWORK_API_KEY` environment variable.",
 				Optional:    true,
 				Sensitive:   true,
+			},
+			"timeout": schema.Int64Attribute{
+				Description: "The timeout in seconds used against the Passwork API. Defaults to `30` seconds.",
+				Optional:    true,
 			},
 		},
 	}
@@ -94,6 +100,7 @@ func (p *PassworkProvider) Configure(ctx context.Context, req provider.Configure
 
 	host := os.Getenv("PASSWORK_HOST")
 	apiKey := os.Getenv("PASSWORK_API_KEY")
+	timeout := 30
 
 	if !config.Host.IsNull() {
 		host = config.Host.ValueString()
@@ -101,6 +108,10 @@ func (p *PassworkProvider) Configure(ctx context.Context, req provider.Configure
 
 	if !config.Api_key.IsNull() {
 		apiKey = config.Api_key.ValueString()
+	}
+
+	if !config.Timeout.IsNull() {
+		timeout = int(config.Timeout.ValueInt64())
 	}
 
 	// If any of the expected configurations are missing, return
@@ -131,7 +142,9 @@ func (p *PassworkProvider) Configure(ctx context.Context, req provider.Configure
 	}
 
 	// Create a new Passwork client using the configuration values
-	client := passwork.NewClient(host, apiKey)
+	timeout_duration := time.Duration(timeout) * time.Second
+	url := host + "/api/v4"
+	client := passwork.NewClient(url, apiKey, timeout_duration)
 	err := client.Login()
 	if err != nil {
 		resp.Diagnostics.AddError(
