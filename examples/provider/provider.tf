@@ -8,7 +8,7 @@ terraform {
 
 provider "passwork" {
   host    = "https://my-passwork-instance.com" # Can be sourced from the environment variable PASSWORK_HOST
-  api_key = "my-api-key"                              # Can be sourced from the environment variable PASSWORK_API_KEY
+  api_key = "my-api-key"                       # Can be sourced from the environment variable PASSWORK_API_KEY
 }
 
 resource "passwork_vault" "example" {

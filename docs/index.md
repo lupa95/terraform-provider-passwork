@@ -55,6 +55,7 @@ The provider supports authentication via an API key. Users can retrieve an API k
 
 - `api_key` (String, Sensitive) The Passwork API key which should be used for authentication. This can alternatively be sourced from the `PASSWORK_API_KEY` environment variable.
 - `host` (String) The Passwork instance's API URL (i.e. https://my-passwork-instance.com). This can alternatively be sourced from the `PASSWORK_HOST` environment variable.
+- `timeout` (Number) The timeout in seconds used against the Passwork API. Defaults to `30` seconds.
 
 ## Development
 
@@ -78,7 +79,7 @@ go install
 provider_installation {
 
   dev_overrides {
-      "registry.terraform.io/hashicorp/passwork" = "[insert GOPATH]/bin"
+      "registry.terraform.io/lupa95/passwork" = "[insert GOPATH]/bin"
   }
   direct {}
 }
@@ -91,7 +92,7 @@ Running tests requires access to a Passwork instance.
 1. Setup Provider configuration: 
 ```bash
 export PASSWORK_API_KEY=<replace-with-api-key>
-export PASSWORK_HOST=https://<replace-with-URL>
+export PASSWORK_HOST=https://my-passwork-instance.com
 export PASSWORK_VAULT_ID=<replace with ID of existing Vault> # Required for data source testing
 ```
 
