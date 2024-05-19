@@ -319,10 +319,14 @@ func PasswordModelToRequest(model PasswordResourceModel) passwork.PasswordReques
 func PasswordResponseToModel(response passwork.PasswordResponse) (PasswordResourceModel, error) {
 	var model PasswordResourceModel
 
-	// Decode base64 password
-	decryptedPassword, err := base64.StdEncoding.DecodeString(response.Data.CryptedPassword)
-	if err != nil {
-		return model, err
+	if response.Data.CryptedPassword == "" {
+		model.Password = types.StringNull()
+	} else {
+		decryptedPassword, err := base64.StdEncoding.DecodeString(response.Data.CryptedPassword)
+		if err != nil {
+			return model, err
+		}
+		model.Password = types.StringValue(string(decryptedPassword))
 	}
 
 	model.VaultId = types.StringValue(response.Data.VaultId)
@@ -331,17 +335,34 @@ func PasswordResponseToModel(response passwork.PasswordResponse) (PasswordResour
 	}
 	model.Id = types.StringValue(response.Data.Id)
 	model.Name = types.StringValue(response.Data.Name)
-	model.Login = types.StringValue(response.Data.Login)
-	model.Password = types.StringValue(string(decryptedPassword))
-	model.Description = types.StringValue(response.Data.Description)
-	model.Url = types.StringValue(response.Data.Url)
+
+	if response.Data.Login != "" {
+		model.Login = types.StringValue(response.Data.Login)
+	} else {
+		model.Login = types.StringNull()
+	}
+
+	if response.Data.Description != "" {
+		model.Description = types.StringValue(response.Data.Description)
+	} else {
+		model.Description = types.StringNull()
+	}
+
+	if response.Data.Url != "" {
+		model.Url = types.StringValue(response.Data.Url)
+	} else {
+		model.Url = types.StringNull()
+	}
+
 	// No color chosen: API returns 0
 	if response.Data.Color != 0 {
 		model.Color = types.Int64Value(int64(response.Data.Color))
 	}
+
 	for _, tag := range response.Data.Tags {
 		model.Tags = append(model.Tags, types.StringValue(tag))
 	}
+
 	model.Access = types.StringValue(response.Data.Access)
 	model.AccessCode = types.Int64Value(int64(response.Data.AccessCode))
 
