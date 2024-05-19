@@ -35,3 +35,12 @@ resource "passwork_vault" "example" {
 - `access` (String) The type of access of the vault.
 - `id` (String) The Id of the vault.
 - `scope` (String) The scope of the vault.
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+# Vaults can be imported by specifying the vault ID
+terraform import passwork_vault.example 65e2086b4172d95ffd7c679f
+```
