@@ -54,3 +54,12 @@ resource "passwork_password" "example" {
 - `access` (String) The type of access of the password entry.
 - `access_code` (Number) The access code of the password entry.
 - `id` (String) The Id of the password entry.
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+# Passwords can be imported by specifying the passwords ID
+terraform import passwork_password.example 65e2086b4172d95ffd7c679f
+```

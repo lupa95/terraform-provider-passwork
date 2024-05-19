@@ -1,5 +1,5 @@
 # Terraform Provider Passwork
-This Terraform provider for the Password Manager (Passwork)[https://passwork.de/] can manage objects like passwords, vaults and folders.
+This Terraform provider for the Password Manager [Passwork](https://passwork.de/) can manage objects like passwords, vaults and folders.
 
 The provider is compatible with Passwork API version `4.0.0`
 
@@ -41,10 +41,11 @@ provider_installation {
 Running tests requires access to a Passwork instance.
 
 1. Setup Provider configuration: 
+
 ```bash
 export PASSWORK_API_KEY=<replace-with-api-key>
 export PASSWORK_HOST=https://my-passwork-instance.com
-export PASSWORK_VAULT_ID=<replace with ID of existing Vault> # Required for data source testing
+export PASSWORK_VAULT_ID=<replace with ID of existing vault> # Required for data source testing
 ```
 
 2. Run tests:

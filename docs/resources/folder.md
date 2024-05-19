@@ -45,3 +45,12 @@ resource "passwork_folder" "example_nested" {
 ### Read-Only
 
 - `id` (String) The Id of the folder.
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+# Folders can be imported by specifying the folder ID 
+terraform import passwork_folder.example 65e2086b4172d95ffd7c679f
+```
