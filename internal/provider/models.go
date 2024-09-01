@@ -11,10 +11,10 @@ type PasswordResourceModel struct {
 	Password    types.String   `tfsdk:"password"`
 	Description types.String   `tfsdk:"description"`
 	Url         types.String   `tfsdk:"url"`
-	Color       types.Int64    `tfsdk:"color"`
+	Color       types.Int32    `tfsdk:"color"`
 	Tags        []types.String `tfsdk:"tags"`
 	Access      types.String   `tfsdk:"access"`
-	AccessCode  types.Int64    `tfsdk:"access_code"`
+	AccessCode  types.Int32    `tfsdk:"access_code"`
 }
 
 type passwordDataSourceModel struct {
@@ -27,7 +27,7 @@ type passwordDataSourceModel struct {
 	Url         types.String `tfsdk:"url"`
 	Tags        types.List   `tfsdk:"tags"`
 	Access      types.String `tfsdk:"access"`
-	AccessCode  types.Int64  `tfsdk:"access_code"`
+	AccessCode  types.Int32  `tfsdk:"access_code"`
 }
 
 type VaultResourceModel struct {

@@ -76,7 +76,7 @@ func (d *passwordDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 				Computed:    true,
 				Description: "The type of access of the password entry.",
 			},
-			"access_code": schema.Int64Attribute{
+			"access_code": schema.Int32Attribute{
 				Computed:    true,
 				Sensitive:   true,
 				Description: "The access code of the password entry.",
@@ -135,7 +135,7 @@ func (d *passwordDataSource) Read(ctx context.Context, req datasource.ReadReques
 	plan.Url = types.StringValue(getResponse.Data.Url)
 	plan.Description = types.StringValue(getResponse.Data.Description)
 	plan.Access = types.StringValue(getResponse.Data.Access)
-	plan.AccessCode = types.Int64Value(int64(getResponse.Data.AccessCode))
+	plan.AccessCode = types.Int32Value(int32(getResponse.Data.AccessCode))
 	plan.Tags, _ = types.ListValueFrom(ctx, types.StringType, getResponse.Data.Tags)
 
 	// Set state
