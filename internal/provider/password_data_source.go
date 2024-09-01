@@ -38,22 +38,22 @@ func (d *passwordDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 	resp.Schema = schema.Schema{
 		Description: "Use this data source to get information about a password entry. Passwords entries can either be selected by Id or searched for by name.",
 		Attributes: map[string]schema.Attribute{
-			"vault_id": schema.StringAttribute{
-				Required:    true,
-				Description: "The Id of the vault, which the password entry is stored in.",
-			},
 			"id": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "The Id of the password entry. Either `id` or `name` must be set.",
 			},
 			"name": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "The name of the password entry. Either `id` or `name` must be set.",
+				MarkdownDescription: "The name of the password entry. If `id` is not supplied, password will be searched by name (best effort). Either `id` or `name` must be set.",
 			},
 			"password": schema.StringAttribute{
 				Computed:    true,
 				Sensitive:   true,
 				Description: "The password value of the password entry.",
+			},
+			"vault_id": schema.StringAttribute{
+				Optional:    true,
+				Description: "The Id of the vault, which the password entry should be searched in. Only applicable if `name` is supplied and `id` is not supplied.",
 			},
 			"login": schema.StringAttribute{
 				Computed:    true,
@@ -97,20 +97,35 @@ func (d *passwordDataSource) Read(ctx context.Context, req datasource.ReadReques
 
 	// Setup passwork data models
 	var getResponse passwork.PasswordResponse
-	var searchRequest = passwork.PasswordSearchRequest{
-		VaultId: plan.VaultId.ValueString(),
-	}
+	var searchResponse passwork.PasswordSearchResponse
+	var searchRequest passwork.PasswordSearchRequest
+	var err error
 
 	// If id is missing, search by name
 	if !plan.Id.IsNull() {
-		getResponse, _ = d.client.GetPassword(plan.Id.ValueString())
+		getResponse, err = d.client.GetPassword(plan.Id.ValueString())
+		if err != nil {
+			ParsePasswordError(err, resp)
+			return
+		}
 	} else if plan.Id.IsNull() && !plan.Name.IsNull() {
 		searchRequest.Query = plan.Name.ValueString()
-		searchResponse, _ := d.client.SearchPassword(searchRequest)
-		getResponse, _ = d.client.GetPassword(searchResponse.Data[0].Id)
+		if !plan.VaultId.IsUnknown() {
+			searchRequest.VaultId = plan.VaultId.ValueString()
+		}
+		searchResponse, err = d.client.SearchPassword(searchRequest)
+		if err != nil {
+			ParsePasswordError(err, resp)
+			return
+		}
+		getResponse, err = d.client.GetPassword(searchResponse.Data[0].Id)
+		if err != nil {
+			ParsePasswordError(err, resp)
+			return
+		}
 	} else {
 		resp.Diagnostics.AddError(
-			"Error Reading Passwork Password",
+			"Pasword search error.",
 			"Please either provide id or name argument.",
 		)
 		return
@@ -120,8 +135,8 @@ func (d *passwordDataSource) Read(ctx context.Context, req datasource.ReadReques
 	decryptedPassword, err := base64.StdEncoding.DecodeString(getResponse.Data.CryptedPassword)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error Reading Passwork Password",
-			"Could not decode Passwork Password "+err.Error(),
+			"Pasword search error.",
+			"Could not decode password "+err.Error(),
 		)
 		return
 	}
@@ -163,4 +178,18 @@ func (d *passwordDataSource) Configure(_ context.Context, req datasource.Configu
 	}
 
 	d.client = client
+}
+
+func ParsePasswordError(err error, resp *datasource.ReadResponse) {
+	if err.Error() == "accessDenied" {
+		resp.Diagnostics.AddError(
+			"Password permission error.",
+			"Could not read password. Make sure you have permission to read it.",
+		)
+	} else if err.Error() == "passwordNull" {
+		resp.Diagnostics.AddError(
+			"Pasword search error.",
+			"Could not find password. Make sure you the password Id or name is valid.",
+		)
+	}
 }
