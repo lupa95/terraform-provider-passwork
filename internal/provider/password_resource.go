@@ -366,5 +366,6 @@ func ParsePasswordResponseError(err error) (summary, detail string) {
 	} else if err.Error() == "passwordNull" {
 		return "Password not found error.", "Could not create, update or read password. Make sure the password Id is correct."
 	}
+
 	return "Unexpected error", "Could not create, update or read password. Error: " + err.Error()
 }
