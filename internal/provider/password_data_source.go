@@ -105,7 +105,7 @@ func (d *passwordDataSource) Read(ctx context.Context, req datasource.ReadReques
 	if !plan.Id.IsNull() {
 		getResponse, err = d.client.GetPassword(plan.Id.ValueString())
 		if err != nil {
-			ParsePasswordError(err, resp)
+			resp.Diagnostics.AddError(ParsePasswordResponseError(err))
 			return
 		}
 	} else if plan.Id.IsNull() && !plan.Name.IsNull() {
@@ -115,12 +115,12 @@ func (d *passwordDataSource) Read(ctx context.Context, req datasource.ReadReques
 		}
 		searchResponse, err = d.client.SearchPassword(searchRequest)
 		if err != nil {
-			ParsePasswordError(err, resp)
+			resp.Diagnostics.AddError(ParsePasswordResponseError(err))
 			return
 		}
 		getResponse, err = d.client.GetPassword(searchResponse.Data[0].Id)
 		if err != nil {
-			ParsePasswordError(err, resp)
+			resp.Diagnostics.AddError(ParsePasswordResponseError(err))
 			return
 		}
 	} else {
@@ -178,18 +178,4 @@ func (d *passwordDataSource) Configure(_ context.Context, req datasource.Configu
 	}
 
 	d.client = client
-}
-
-func ParsePasswordError(err error, resp *datasource.ReadResponse) {
-	if err.Error() == "accessDenied" {
-		resp.Diagnostics.AddError(
-			"Password permission error.",
-			"Could not read password. Make sure you have permission to read it.",
-		)
-	} else if err.Error() == "passwordNull" {
-		resp.Diagnostics.AddError(
-			"Pasword search error.",
-			"Could not find password. Make sure you the password Id or name is valid.",
-		)
-	}
 }

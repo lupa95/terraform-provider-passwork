@@ -144,7 +144,7 @@ func (r *PasswordResource) Create(ctx context.Context, req resource.CreateReques
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error Creating Password",
-			"Could not update password, unexpected error: "+err.Error(),
+			"Could not update password, unexpected error: "+response.Code,
 		)
 		return
 	}
@@ -187,10 +187,7 @@ func (r *PasswordResource) Read(ctx context.Context, req resource.ReadRequest, r
 
 	// Check for errors
 	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error reading password",
-			"Could not read Passwork Password ID "+state.Id.ValueString()+": "+err.Error(),
-		)
+		resp.Diagnostics.AddError(ParsePasswordResponseError(err))
 		return
 	}
 
@@ -240,10 +237,7 @@ func (r *PasswordResource) Update(ctx context.Context, req resource.UpdateReques
 	// Send request
 	response, err = r.client.EditPassword(plan.Id.ValueString(), request)
 	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error Updating Password",
-			"Could not update password, unexpected error: "+err.Error(),
-		)
+		resp.Diagnostics.AddError(ParsePasswordResponseError(err))
 		return
 	}
 
@@ -281,10 +275,7 @@ func (r *PasswordResource) Delete(ctx context.Context, req resource.DeleteReques
 	// Send delete request
 	_, err = r.client.DeletePassword(plan.Id.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error Deleting Password",
-			"Could not delete password, unexpected error: "+err.Error(),
-		)
+		resp.Diagnostics.AddError(ParsePasswordResponseError(err))
 		return
 	}
 }
@@ -367,4 +358,13 @@ func PasswordResponseToModel(response passwork.PasswordResponse) (PasswordResour
 	model.AccessCode = types.Int32Value(int32(response.Data.AccessCode))
 
 	return model, nil
+}
+
+func ParsePasswordResponseError(err error) (summary, detail string) {
+	if err.Error() == "accessDenied" {
+		return "Password permission error.", "Could not create, update or read password. Make sure you have access to the password and vault."
+	} else if err.Error() == "passwordNull" {
+		return "Password not found error.", "Could not create, update or read password. Make sure the password Id is correct."
+	}
+	return "Unexpected error", "Could not create, update or read password. Error: " + err.Error()
 }
