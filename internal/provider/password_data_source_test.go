@@ -21,7 +21,20 @@ func TestPasswordDataSource(t *testing.T) {
 		PreCheck:                 func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: providerConfig + testAccPasswordDataSourceConfig(passwordName, vaultId),
+				Config: providerConfig + testAccPasswordDataSourceConfigName(passwordName, vaultId),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttrPair(dataSourceName, "name", passwordResourceName, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "id", passwordResourceName, "id"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "vault_id", passwordResourceName, "vault_id"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "login", passwordResourceName, "login"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "password", passwordResourceName, "password"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "url", passwordResourceName, "url"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "description", passwordResourceName, "description"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "tags", passwordResourceName, "tags"),
+				),
+			},
+			{
+				Config: providerConfig + testAccPasswordDataSourceConfigId(passwordName, vaultId),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceName, "name", passwordResourceName, "name"),
 					resource.TestCheckResourceAttrPair(dataSourceName, "id", passwordResourceName, "id"),
@@ -37,7 +50,7 @@ func TestPasswordDataSource(t *testing.T) {
 	})
 }
 
-func testAccPasswordDataSourceConfig(passwordName, vaultId string) string {
+func testAccPasswordDataSourceConfigName(passwordName, vaultId string) string {
 	return fmt.Sprintf(`
 resource "passwork_password" "test" {
 	name        = %[1]q
@@ -53,6 +66,25 @@ resource "passwork_password" "test" {
 data "passwork_password" "test" {
 	name     = passwork_password.test.name
 	vault_id = passwork_password.test.vault_id
+}
+`, passwordName, vaultId)
+}
+
+func testAccPasswordDataSourceConfigId(passwordName, vaultId string) string {
+	return fmt.Sprintf(`
+resource "passwork_password" "test" {
+	name        = %[1]q
+	vault_id    = %[2]q
+	login       = "provider-test-user"
+	password    = "provider-test-password"
+	url         = "https://login.com"
+	description = "provider-test-description"
+	color       = 1
+	tags        = ["provider", "test", "tag"]
+}
+
+data "passwork_password" "test" {
+	id     = passwork_password.test.id
 }
 `, passwordName, vaultId)
 }

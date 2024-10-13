@@ -32,7 +32,7 @@ type PassworkProvider struct {
 type passworkProviderModel struct {
 	Host    types.String `tfsdk:"host"`
 	Api_key types.String `tfsdk:"api_key"`
-	Timeout types.Int64  `tfsdk:"timeout"`
+	Timeout types.Int32  `tfsdk:"timeout"`
 }
 
 func (p *PassworkProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -53,7 +53,7 @@ func (p *PassworkProvider) Schema(ctx context.Context, req provider.SchemaReques
 				Optional:    true,
 				Sensitive:   true,
 			},
-			"timeout": schema.Int64Attribute{
+			"timeout": schema.Int32Attribute{
 				Description: "The timeout in seconds used against the Passwork API. Defaults to `30` seconds.",
 				Optional:    true,
 			},
@@ -111,7 +111,7 @@ func (p *PassworkProvider) Configure(ctx context.Context, req provider.Configure
 	}
 
 	if !config.Timeout.IsNull() {
-		timeout = int(config.Timeout.ValueInt64())
+		timeout = int(config.Timeout.ValueInt32())
 	}
 
 	// If any of the expected configurations are missing, return

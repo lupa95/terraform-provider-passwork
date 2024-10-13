@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int32planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -61,11 +61,11 @@ func (r *PasswordResource) Schema(ctx context.Context, req resource.SchemaReques
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"access_code": schema.Int64Attribute{
+			"access_code": schema.Int32Attribute{
 				Description: "The access code of the password entry.",
 				Computed:    true,
-				PlanModifiers: []planmodifier.Int64{
-					int64planmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.Int32{
+					int32planmodifier.UseStateForUnknown(),
 				},
 			},
 			"login": schema.StringAttribute{
@@ -84,7 +84,7 @@ func (r *PasswordResource) Schema(ctx context.Context, req resource.SchemaReques
 				Description: "The description of the password entry.",
 				Optional:    true,
 			},
-			"color": schema.Int64Attribute{
+			"color": schema.Int32Attribute{
 				Description: "The color code of the password entry.",
 				Optional:    true,
 			},
@@ -144,7 +144,7 @@ func (r *PasswordResource) Create(ctx context.Context, req resource.CreateReques
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error Creating Password",
-			"Could not update password, unexpected error: "+err.Error(),
+			"Could not update password, unexpected error: "+response.Code,
 		)
 		return
 	}
@@ -187,10 +187,7 @@ func (r *PasswordResource) Read(ctx context.Context, req resource.ReadRequest, r
 
 	// Check for errors
 	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error Reading Passwork Password",
-			"Could not read Passwork Password ID "+state.Id.ValueString()+": "+err.Error(),
-		)
+		resp.Diagnostics.AddError(ParsePasswordResponseError(err))
 		return
 	}
 
@@ -240,10 +237,7 @@ func (r *PasswordResource) Update(ctx context.Context, req resource.UpdateReques
 	// Send request
 	response, err = r.client.EditPassword(plan.Id.ValueString(), request)
 	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error Updating Password",
-			"Could not update password, unexpected error: "+err.Error(),
-		)
+		resp.Diagnostics.AddError(ParsePasswordResponseError(err))
 		return
 	}
 
@@ -281,10 +275,7 @@ func (r *PasswordResource) Delete(ctx context.Context, req resource.DeleteReques
 	// Send delete request
 	_, err = r.client.DeletePassword(plan.Id.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error Deleting Password",
-			"Could not delete password, unexpected error: "+err.Error(),
-		)
+		resp.Diagnostics.AddError(ParsePasswordResponseError(err))
 		return
 	}
 }
@@ -304,7 +295,7 @@ func PasswordModelToRequest(model PasswordResourceModel) passwork.PasswordReques
 		CryptedPassword: cryptedPassword,
 		Description:     model.Description.ValueString(),
 		Url:             model.Url.ValueString(),
-		Color:           int(model.Color.ValueInt64()),
+		Color:           int(model.Color.ValueInt32()),
 		VaultId:         model.VaultId.ValueString(),
 		FolderId:        model.FolderId.ValueString(),
 	}
@@ -356,7 +347,7 @@ func PasswordResponseToModel(response passwork.PasswordResponse) (PasswordResour
 
 	// No color chosen: API returns 0
 	if response.Data.Color != 0 {
-		model.Color = types.Int64Value(int64(response.Data.Color))
+		model.Color = types.Int32Value(int32(response.Data.Color))
 	}
 
 	for _, tag := range response.Data.Tags {
@@ -364,7 +355,17 @@ func PasswordResponseToModel(response passwork.PasswordResponse) (PasswordResour
 	}
 
 	model.Access = types.StringValue(response.Data.Access)
-	model.AccessCode = types.Int64Value(int64(response.Data.AccessCode))
+	model.AccessCode = types.Int32Value(int32(response.Data.AccessCode))
 
 	return model, nil
+}
+
+func ParsePasswordResponseError(err error) (summary, detail string) {
+	if err.Error() == "accessDenied" {
+		return "Password permission error.", "Could not create, update or read password. Make sure you have access to the password and vault."
+	} else if err.Error() == "passwordNull" {
+		return "Password not found error.", "Could not create, update or read password. Make sure the password Id is correct."
+	}
+
+	return "Unexpected error", "Could not create, update or read password. Error: " + err.Error()
 }

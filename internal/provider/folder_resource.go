@@ -104,10 +104,7 @@ func (r *FolderResource) Create(ctx context.Context, req resource.CreateRequest,
 	// Send request
 	response, err = r.client.AddFolder(request)
 	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error Creating folder",
-			"Could not create folder, unexpected error: "+err.Error(),
-		)
+		resp.Diagnostics.AddError(ParseFolderResponseError(err))
 		return
 	}
 
@@ -139,10 +136,7 @@ func (r *FolderResource) Read(ctx context.Context, req resource.ReadRequest, res
 
 	response, err = r.client.GetFolder(state.Id.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error deleting folder",
-			"Could not delete folder, unexpected error: "+err.Error(),
-		)
+		resp.Diagnostics.AddError(ParseFolderResponseError(err))
 		return
 	}
 
@@ -179,10 +173,7 @@ func (r *FolderResource) Update(ctx context.Context, req resource.UpdateRequest,
 	// Send request
 	response, err = r.client.EditFolder(plan.Id.ValueString(), request)
 	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error Updating folder",
-			"Could not update folder, unexpected error: "+err.Error(),
-		)
+		resp.Diagnostics.AddError(ParseFolderResponseError(err))
 		return
 	}
 
@@ -214,10 +205,7 @@ func (r *FolderResource) Delete(ctx context.Context, req resource.DeleteRequest,
 	// Send request
 	_, err = r.client.DeleteFolder(plan.Id.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error Updating folder",
-			"Could not update folder, unexpected error: "+err.Error(),
-		)
+		resp.Diagnostics.AddError(ParseFolderResponseError(err))
 		return
 	}
 }
@@ -239,4 +227,12 @@ func FolderResponseToModel(response passwork.FolderResponse) FolderResourceModel
 	}
 
 	return folder
+}
+
+func ParseFolderResponseError(err error) (summary, detail string) {
+	if err.Error() == "accessDenied" {
+		return "Folder permission error.", "Could not create, update or read folder. Make sure you have access to the folder and vault."
+	}
+
+	return "Unexpected error", "Could not create, update or read folder. Error: " + err.Error()
 }
