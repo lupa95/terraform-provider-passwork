@@ -42,6 +42,7 @@ data "passwork_password" "example" {
 
 - `id` (String) The Id of the password entry. Either `id` or `name` must be set.
 - `name` (String) The name of the password entry. If `id` is not supplied, password will be searched by name (best effort). Either `id` or `name` must be set.
+- `vault_id` (String) The Id of the vault, which the password entry should be searched in. Only applicable if `name` is supplied and `id` is not supplied.
 
 ### Read-Only
 
@@ -52,4 +53,3 @@ data "passwork_password" "example" {
 - `password` (String, Sensitive) The password value of the password entry.
 - `tags` (List of String) The list of tags, which are assigned to the password entry.
 - `url` (String) The URL of the password entry.
-- `vault_id` (String) The Id of the vault, which the password entry should be searched in. Only applicable if `name` is supplied and `id` is not supplied.
