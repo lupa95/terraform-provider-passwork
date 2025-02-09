@@ -1,6 +1,13 @@
 # Terraform Provider testing workflow.
 name: Tests
 
+on:
+  pull_request:
+    paths-ignore:
+      - 'README.md'
+      - '.gitignore'
+      - 'LICENSE'
+
 # Testing only needs permissions to read the repository contents.
 permissions:
   contents: read
