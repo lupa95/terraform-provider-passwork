@@ -1,13 +1,13 @@
 module terraform-provider-passwork
 
-go 1.22.6
+go 1.23.5
 
 require (
 	github.com/hashicorp/terraform-plugin-docs v0.16.0
 	github.com/hashicorp/terraform-plugin-framework v1.11.0
 	github.com/hashicorp/terraform-plugin-go v0.23.0
 	github.com/hashicorp/terraform-plugin-testing v1.10.0
-	github.com/lupa95/passwork-client-go v0.2.1
+	github.com/lupa95/passwork-client-go v0.2.2
 )
 
 require (
