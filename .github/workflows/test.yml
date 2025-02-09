@@ -1,18 +1,11 @@
 # Terraform Provider testing workflow.
 name: Tests
 
-# This GitHub action runs your tests for each pull request and push.
-# Optionally, you can turn it on using a schedule for regular testing.
 on:
   pull_request:
     paths-ignore:
       - 'README.md'
-      - 'CHANGELOG.md'
-      - 'LICENSE'
-  push:
-    paths-ignore:
-      - 'README.md'
-      - 'CHANGELOG.md'
+      - '.gitignore'
       - 'LICENSE'
 
 # Testing only needs permissions to read the repository contents.
@@ -24,42 +17,34 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    env:
-      GOPRIVATE: github.com/lupa95/passwork-client-go
-      GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4.1.1
-      - uses: actions/setup-go@v5.0.0
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
           go-version-file: 'go.mod'
           cache: true
-      - run: git config --global url.https://$GH_ACCESS_TOKEN@github.com/.insteadOf https://github.com/
       - run: go mod download
       - run: go build -v .
       - name: Run linters
-        uses: golangci/golangci-lint-action@v4.0.0
-        with:
-          version: v1.55
-          skip-cache: true
+        uses: golangci/golangci-lint-action@v6
 
   generate:
     runs-on: ubuntu-latest
-    env:
-      GOPRIVATE: github.com/lupa95/passwork-client-go
-      GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
     steps:
-      - uses: actions/checkout@v4.1.1
-      - uses: actions/setup-go@v5.0.0
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
           go-version-file: 'go.mod'
           cache: true
-      - run: git config --global url.https://$GH_ACCESS_TOKEN@github.com/.insteadOf https://github.com/
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
       - run: go generate ./...
       - name: git diff
         run: |
           git diff --compact-summary --exit-code || \
-            (echo; echo "Unexpected difference in directories after code generation. Run 'go generate ./...' command and commit."; exit 1)
+            (echo; echo "Unexpected difference in directories after code generation. Run 'go generate' command and commit."; exit 1)
 
   # # Run acceptance tests in a matrix with Terraform CLI versions
   # test:
